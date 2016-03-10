@@ -33,16 +33,21 @@ require_once __DIR__ . '/Maintenance.php';
  * @ingroup Maintenance
  */
 class RebuildTextIndex extends Maintenance {
-	const RTI_CHUNK_SIZE = 500;
+	const RTI_CHUNK_SIZE = 1000;
 
 	/**
 	 * @var DatabaseBase
 	 */
 	private $db;
+	private $worker_num;
+	private $total_workers;
 
 	public function __construct() {
+	        global $argv;
 		parent::__construct();
 		$this->addDescription( 'Rebuild search index table from scratch' );
+		$this->worker_num = $argv[1];
+		$this->total_workers = $argv[2];
 	}
 
 	public function getDbType() {
@@ -68,10 +73,11 @@ class RebuildTextIndex extends Maintenance {
 		}
 
 		if ( $this->db->getType() == 'mysql' ) {
-			$this->dropMysqlTextIndex();
+		   if ($this->worker_num == 0) {
 			$this->clearSearchIndex();
-			$this->populateSearchIndex();
-			$this->createMysqlTextIndex();
+			$this->dropMysqlTextIndex();
+                   }
+		   $this->populateSearchIndex();
 		} else {
 			$this->clearSearchIndex();
 			$this->populateSearchIndex();
@@ -103,7 +109,7 @@ class RebuildTextIndex extends Maintenance {
 			$end = $n + self::RTI_CHUNK_SIZE - 1;
 
 			$res = $this->db->select( [ 'page', 'revision', 'text' ], $fields,
-				[ "page_id BETWEEN $n AND $end", 'page_latest = rev_id', 'rev_text_id = old_id' ],
+				[ "page_id BETWEEN $n AND $end", 'page_latest = rev_id', 'rev_text_id = old_id', 'page_id % ' . $this->total_workers . ' = ' . $this->worker_num ],
 				__METHOD__
 			);
 
