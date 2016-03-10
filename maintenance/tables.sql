@@ -1,3 +1,7 @@
+drop database wikipedia;
+create database wikipedia default character set binary;
+use wikipedia;
+
 -- SQL to create the initial tables for the MediaWiki database.
 -- This is read and executed by the install script; you should
 -- not have to run it by itself unless doing a manual install.
@@ -260,6 +264,8 @@ CREATE TABLE /*_*/page (
   -- defined in includes/Defines.php
   page_namespace int NOT NULL,
 
+  page_counter int,
+
   -- The rest of the title, as text.
   -- Spaces are transformed into underscores in title storage.
   page_title varchar(255) binary NOT NULL,
@@ -304,12 +310,12 @@ CREATE TABLE /*_*/page (
   -- Page content language
   page_lang varbinary(35) DEFAULT NULL
 ) /*$wgDBTableOptions*/;
-
-CREATE UNIQUE INDEX /*i*/name_title ON /*_*/page (page_namespace,page_title);
-CREATE INDEX /*i*/page_random ON /*_*/page (page_random);
-CREATE INDEX /*i*/page_len ON /*_*/page (page_len);
-CREATE INDEX /*i*/page_redirect_namespace_len ON /*_*/page (page_is_redirect, page_namespace, page_len);
-
+--
+-- CREATE UNIQUE INDEX /*i*/name_title ON /*_*/page (page_namespace,page_title);
+-- CREATE INDEX /*i*/page_random ON /*_*/page (page_random);
+-- CREATE INDEX /*i*/page_len ON /*_*/page (page_len);
+-- CREATE INDEX /*i*/page_redirect_namespace_len ON /*_*/page (page_is_redirect, page_namespace, page_len);
+--
 --
 -- Every edit of a page creates also a revision row.
 -- This stores metadata about the revision, and a reference
@@ -1176,8 +1182,10 @@ CREATE TABLE /*_*/searchindex (
   si_title varchar(255) NOT NULL default '',
 
   -- Munged version of body text
-  si_text mediumtext NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  si_text mediumtext NOT NULL,
+  FTS_DOC_ID bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (FTS_DOC_ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE UNIQUE INDEX /*i*/si_page ON /*_*/searchindex (si_page);
 CREATE FULLTEXT INDEX /*i*/si_title ON /*_*/searchindex (si_title);
