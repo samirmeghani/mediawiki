@@ -383,6 +383,7 @@ class SearchMySQL extends SearchDatabase {
 		global $wgContLang;
 
 		$out = parent::normalizeText( $string );
+                return $out;
 
 		// MySQL fulltext index doesn't grok utf-8, so we
 		// need to fold cases and convert to hex

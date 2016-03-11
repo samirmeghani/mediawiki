@@ -1182,9 +1182,7 @@ CREATE TABLE /*_*/searchindex (
   si_title varchar(255) NOT NULL default '',
 
   -- Munged version of body text
-  si_text mediumtext NOT NULL,
-  FTS_DOC_ID bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (FTS_DOC_ID)
+  si_text mediumtext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE UNIQUE INDEX /*i*/si_page ON /*_*/searchindex (si_page);
